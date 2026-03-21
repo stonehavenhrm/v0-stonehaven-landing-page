@@ -1,0 +1,6 @@
+# Robots.txt for Stonehaven Property Services
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://stonehavenhrm.ca/sitemap.xml
