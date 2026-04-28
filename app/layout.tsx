@@ -112,28 +112,6 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','${GTM_ID}');
           `}
         </Script>
-
-        {/* ✅ jQuery */}
-        <Script
-          src="https://code.jquery.com/jquery-3.7.1.min.js"
-          strategy="afterInteractive"
-        />
-
-        {/* ✅ jQuery DataLayer Push Script */}
-        <Script id="jquery-datalayer" strategy="afterInteractive">
-  {`
-    $(document).ready(function() {
-      $(document).on('submit', '#free_quote_form', function() {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: 'form_submission',
-          form_name: 'free_quote_form'
-        });
-      });
-    });
-  `}
-</Script>
-        
       </head>
 
       <body className={`font-sans antialiased`}>
