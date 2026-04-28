@@ -167,7 +167,8 @@ ${details}
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-center mb-1 sm:mb-2">{t("requestQuote")}</h2>
                 <p className="text-center text-muted-foreground text-sm sm:text-base mb-3 sm:mb-4">{selectedService}</p>
-                <form className="space-y-2 sm:space-y-3" onSubmit={handleSubmit}>
+                <form id="free_quote_form" name="free_quote_form" className="space-y-2 sm:space-y-3" onSubmit={handleSubmit}>
+                  
                   <div>
                     <label className="block text-xs sm:text-sm font-medium mb-1">{t("firstName")}</label>
                     <input
