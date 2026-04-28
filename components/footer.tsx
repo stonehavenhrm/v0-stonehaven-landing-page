@@ -23,7 +23,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="text-center umer">
           <p className="text-muted-foreground">
-            © {new Date().getFullYear()} Stonehaven Property Service. {t("allRightsReserved")}
+            © {new Date().getFullYear()} Stonehaven Property Services. {t("allRightsReserved")}
           </p>
           <div className="mt-4 flex justify-center gap-6 text-sm text-muted-foreground">
             <a href="#" className="transition-colors hover:text-primary">
