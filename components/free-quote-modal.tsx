@@ -8,6 +8,18 @@ import { useLanguage } from "@/contexts/language-context"
 import { SimpleToast } from "@/components/simple-toast"
 import { buildMailtoUrl } from "@/lib/email"
 
+// GTM Data Layer helper
+declare global {
+  interface Window {
+    dataLayer: Record<string, unknown>[]
+  }
+}
+
+const pushDataLayer = (data: Record<string, unknown>) => {
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push(data)
+}
+
 interface FreeQuoteModalProps {
   isOpen: boolean
   onClose: () => void
@@ -21,29 +33,65 @@ export function FreeQuoteModal({ isOpen, onClose }: FreeQuoteModalProps) {
   const [showToast, setShowToast] = useState(false)
 
   const residentialServices = [t("snowRemoval"), t("lawncare"), t("garbageRemovalService"), t("pressureWashing")]
-
   const commercialServices = [t("snowServices"), t("grassServices")]
 
   const handleServiceTypeSelect = (type: "residential" | "commercial") => {
     setServiceType(type)
     setStep("service")
+
+    // GTM Event: user selected service type
+    pushDataLayer({
+      event: "quote_service_type_selected",
+      quote_service_type: type,
+      quote_language: language,
+    })
   }
 
   const handleServiceSelect = (service: string) => {
     setSelectedService(service)
     setStep("form")
+
+    // GTM Event: user selected a specific service → form is now shown
+    pushDataLayer({
+      event: "quote_service_selected",
+      quote_service_type: serviceType,
+      quote_service_name: service,
+      quote_language: language,
+    })
   }
 
   const handleBack = () => {
     if (step === "form") {
       setStep("service")
+
+      // GTM Event: user went back from form
+      pushDataLayer({
+        event: "quote_form_back",
+        quote_step_from: "form",
+        quote_step_to: "service",
+      })
     } else if (step === "service") {
       setStep("type")
       setServiceType(null)
+
+      // GTM Event: user went back from service selection
+      pushDataLayer({
+        event: "quote_form_back",
+        quote_step_from: "service",
+        quote_step_to: "type",
+      })
     }
   }
 
   const handleClose = () => {
+    // GTM Event: user dismissed the modal
+    pushDataLayer({
+      event: "quote_modal_closed",
+      quote_step_at_close: step,
+      quote_service_type: serviceType ?? "not_selected",
+      quote_service_name: selectedService || "not_selected",
+    })
+
     setStep("type")
     setServiceType(null)
     setSelectedService("")
@@ -85,6 +133,16 @@ ${details}
       body: body,
     })
 
+    // GTM Event: form submitted successfully
+    pushDataLayer({
+      event: "quote_form_submitted",
+      quote_service_type: serviceType,
+      quote_service_name: selectedService,
+      quote_language: language,
+      quote_has_details: details.trim().length > 0,
+      quote_contact_type: contact.includes("@") ? "email" : "phone",
+    })
+
     window.open(mailtoUrl, "_blank")
     setShowToast(true)
     setTimeout(() => {
@@ -92,7 +150,18 @@ ${details}
     }, 2000)
   }
 
+  // GTM Event: modal opened
+  const handleModalOpen = () => {
+    pushDataLayer({
+      event: "quote_modal_opened",
+      quote_language: language,
+    })
+  }
+
   if (!isOpen) return null
+
+  // Fire modal opened once when it becomes visible
+  if (isOpen) handleModalOpen()
 
   return (
     <>
@@ -108,8 +177,15 @@ ${details}
           <div className="p-4 sm:p-6">
             <div className="mb-3 sm:mb-4 text-center">
               <p className="text-sm sm:text-base text-muted-foreground mb-1">{t("callUsNow")}</p>
-              <a
+              
                 href="tel:+19027892444"
+                onClick={() =>
+                  pushDataLayer({
+                    event: "quote_phone_click",
+                    quote_step: step,
+                    quote_language: language,
+                  })
+                }
                 className="text-xl sm:text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
               >
                 902-789-2444
@@ -174,6 +250,13 @@ ${details}
                       type="text"
                       name="firstName"
                       required
+                      onFocus={() =>
+                        pushDataLayer({
+                          event: "quote_form_field_focus",
+                          quote_field_name: "firstName",
+                          quote_service_name: selectedService,
+                        })
+                      }
                       className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
                       placeholder={t("firstName")}
                     />
@@ -184,6 +267,13 @@ ${details}
                       type="text"
                       name="address"
                       required
+                      onFocus={() =>
+                        pushDataLayer({
+                          event: "quote_form_field_focus",
+                          quote_field_name: "address",
+                          quote_service_name: selectedService,
+                        })
+                      }
                       className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
                       placeholder={t("addressOfService")}
                     />
@@ -194,6 +284,13 @@ ${details}
                       type="text"
                       name="contact"
                       required
+                      onFocus={() =>
+                        pushDataLayer({
+                          event: "quote_form_field_focus",
+                          quote_field_name: "contact",
+                          quote_service_name: selectedService,
+                        })
+                      }
                       className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
                       placeholder={t("phoneOrEmail")}
                     />
@@ -204,6 +301,13 @@ ${details}
                       name="details"
                       rows={3}
                       required
+                      onFocus={() =>
+                        pushDataLayer({
+                          event: "quote_form_field_focus",
+                          quote_field_name: "details",
+                          quote_service_name: selectedService,
+                        })
+                      }
                       className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                       placeholder={t("describeDetails")}
                     />
