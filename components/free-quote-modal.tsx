@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { X } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
@@ -21,7 +20,6 @@ export function FreeQuoteModal({ isOpen, onClose }: FreeQuoteModalProps) {
   const [showToast, setShowToast] = useState(false)
 
   const residentialServices = [t("snowRemoval"), t("lawncare"), t("garbageRemovalService"), t("pressureWashing")]
-
   const commercialServices = [t("snowServices"), t("grassServices")]
 
   const handleServiceTypeSelect = (type: "residential" | "commercial") => {
@@ -58,6 +56,19 @@ export function FreeQuoteModal({ isOpen, onClose }: FreeQuoteModalProps) {
     const address = formData.get("address") as string
     const contact = formData.get("contact") as string
     const details = formData.get("details") as string
+
+    // ✅ GTM DataLayer Push - directly from React
+    if (typeof window !== "undefined") {
+      window.dataLayer = window.dataLayer || []
+      window.dataLayer.push({
+        event: "form_submission",
+        form_name: "free_quote_form",
+        service_type: serviceType,
+        selected_service: selectedService,
+        user_name: firstName,
+        user_address: address,
+      })
+    }
 
     const subjectMap: Record<string, string> = {
       en: `Quote Request - ${selectedService}`,
@@ -108,7 +119,7 @@ ${details}
           <div className="p-4 sm:p-6">
             <div className="mb-3 sm:mb-4 text-center">
               <p className="text-sm sm:text-base text-muted-foreground mb-1">{t("callUsNow")}</p>
-              <a
+              
                 href="tel:+19027892444"
                 className="text-xl sm:text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
               >
@@ -168,7 +179,6 @@ ${details}
                 <h2 className="text-xl sm:text-2xl font-bold text-center mb-1 sm:mb-2">{t("requestQuote")}</h2>
                 <p className="text-center text-muted-foreground text-sm sm:text-base mb-3 sm:mb-4">{selectedService}</p>
                 <form id="free_quote_form" name="free_quote_form" className="space-y-2 sm:space-y-3" onSubmit={handleSubmit}>
-                  
                   <div>
                     <label className="block text-xs sm:text-sm font-medium mb-1">{t("firstName")}</label>
                     <input
