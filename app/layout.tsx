@@ -113,28 +113,39 @@ export default function RootLayout({
           `}
         </Script>
 
-      {/* ✅ Form Submission DataLayer Push */}
+        {/* ✅ Form Submission DataLayer Push */}
 <Script id="form-datalayer" strategy="afterInteractive">
   {`
     (function() {
-      function pushFormSubmission() {
+      function pushFormSubmission(formData) {
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
           event: 'form_submission',
           form_name: 'free_quote_form',
-          form_id: 'free_quote_form'
+          form_id: 'free_quote_form',
+          first_name: formData.firstName,
+          address: formData.address,
+          contact: formData.contact,
+          details: formData.details
         });
       }
 
       document.addEventListener('submit', function(e) {
         var form = e.target;
         if (form && form.id === 'free_quote_form') {
-          pushFormSubmission();
+          var formData = {
+            firstName: form.querySelector('[name="firstName"]') ? form.querySelector('[name="firstName"]').value : null,
+            address: form.querySelector('[name="address"]') ? form.querySelector('[name="address"]').value : null,
+            contact: form.querySelector('[name="contact"]') ? form.querySelector('[name="contact"]').value : null,
+            details: form.querySelector('[name="details"]') ? form.querySelector('[name="details"]').value : null
+          };
+          pushFormSubmission(formData);
         }
       }, true);
     })();
   `}
-</Script>  
+</Script>
+          
       </head>
 
       <body className={`font-sans antialiased`}>
