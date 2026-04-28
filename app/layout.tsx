@@ -92,7 +92,7 @@ export const metadata: Metadata = {
   },
 }
 
-const GTM_ID = "GTM-PPDF8RR4" // 👉 yahan apna GTM ID dalna
+const GTM_ID = "GTM-PPDF8RR4"
 
 export default function RootLayout({
   children,
@@ -112,6 +112,32 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','${GTM_ID}');
           `}
         </Script>
+
+        {/* ✅ jQuery */}
+        <Script
+          src="https://code.jquery.com/jquery-3.7.1.min.js"
+          strategy="afterInteractive"
+        />
+
+        {/* ✅ jQuery DataLayer Push Script */}
+        <Script id="jquery-datalayer" strategy="afterInteractive">
+          {`
+            $(document).ready(function() {
+
+              // ✅ Form Submit Event
+              $(document).on('submit', 'form', function(e) {
+                var formName = $(this).attr('name') || $(this).attr('id') || 'unknown_form';
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                  event: 'form_submission',
+                  form_name: formName,
+                });
+              });
+
+            });
+          `}
+        </Script>
+
       </head>
 
       <body className={`font-sans antialiased`}>
