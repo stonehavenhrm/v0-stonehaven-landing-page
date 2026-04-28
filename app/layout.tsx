@@ -112,6 +112,29 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','${GTM_ID}');
           `}
         </Script>
+
+      {/* ✅ Form Submission DataLayer Push */}
+<Script id="form-datalayer" strategy="afterInteractive">
+  {`
+    (function() {
+      function pushFormSubmission() {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'form_submission',
+          form_name: 'free_quote_form',
+          form_id: 'free_quote_form'
+        });
+      }
+
+      document.addEventListener('submit', function(e) {
+        var form = e.target;
+        if (form && form.id === 'free_quote_form') {
+          pushFormSubmission();
+        }
+      }, true);
+    })();
+  `}
+</Script>  
       </head>
 
       <body className={`font-sans antialiased`}>
