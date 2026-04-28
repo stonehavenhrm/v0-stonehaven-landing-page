@@ -121,23 +121,19 @@ export default function RootLayout({
 
         {/* ✅ jQuery DataLayer Push Script */}
         <Script id="jquery-datalayer" strategy="afterInteractive">
-          {`
-            $(document).ready(function() {
-
-              // ✅ Form Submit Event
-              $(document).on('submit', 'form', function(e) {
-                var formName = $(this).attr('name') || $(this).attr('id') || 'unknown_form';
-                window.dataLayer = window.dataLayer || [];
-                window.dataLayer.push({
-                  event: 'form_submission',
-                  form_name: formName,
-                });
-              });
-
-            });
-          `}
-        </Script>
-
+  {`
+    $(document).ready(function() {
+      $(document).on('submit', '#free_quote_form', function() {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'form_submission',
+          form_name: 'free_quote_form'
+        });
+      });
+    });
+  `}
+</Script>
+        
       </head>
 
       <body className={`font-sans antialiased`}>
