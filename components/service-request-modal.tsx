@@ -54,22 +54,7 @@ export function ServiceRequestModal({ isOpen, onClose }: ServiceRequestModalProp
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Fire modal_opened ONCE when isOpen flips true — not on every render.
-  useEffect(() => {
-    if (!isOpen) return
-    pushDataLayer({
-      event: "service_request_modal_opened",
-      service_request_language: language,
-    })
-  }, [isOpen, language])
-
   const handleClose = () => {
-    pushDataLayer({
-      event: "service_request_modal_closed",
-      service_request_service_type: selectedService || "not_selected",
-      service_request_language: language,
-    })
-
     setSelectedService("")
     onClose()
   }
@@ -114,9 +99,8 @@ ${details}
       body: body,
     })
 
-    // The event GTM is listening for — same shape as free_quote_form.
     pushDataLayer({
-      event: "form_submission",
+      event: "service_request",
       form_name: "service_quote_modal",
       form_id: "service_quote_modal",
       first_name: firstName,
@@ -125,9 +109,7 @@ ${details}
       contact: phone,
       address: address,
       service: selectedService,
-      service_label: selectedServiceLabel,
       details: details,
-      language: language,
     })
 
     // Let GTM flush before the mailto handoff.
@@ -165,12 +147,6 @@ ${details}
                     type="text"
                     name="firstName"
                     required
-                    onFocus={() =>
-                      pushDataLayer({
-                        event: "service_request_field_focus",
-                        service_request_field_name: "firstName",
-                      })
-                    }
                     className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder={t("firstName")}
                   />
@@ -181,12 +157,6 @@ ${details}
                     type="text"
                     name="lastName"
                     required
-                    onFocus={() =>
-                      pushDataLayer({
-                        event: "service_request_field_focus",
-                        service_request_field_name: "lastName",
-                      })
-                    }
                     className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder={t("lastName")}
                   />
@@ -199,12 +169,6 @@ ${details}
                   type="email"
                   name="email"
                   required
-                  onFocus={() =>
-                    pushDataLayer({
-                      event: "service_request_field_focus",
-                      service_request_field_name: "email",
-                    })
-                  }
                   className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder={t("emailPlaceholder")}
                 />
@@ -216,12 +180,6 @@ ${details}
                   type="tel"
                   name="phone"
                   required
-                  onFocus={() =>
-                    pushDataLayer({
-                      event: "service_request_field_focus",
-                      service_request_field_name: "phone",
-                    })
-                  }
                   className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder={t("phonePlaceholder")}
                 />
@@ -254,12 +212,6 @@ ${details}
                           onClick={() => {
                             setSelectedService(service.value)
                             setIsDropdownOpen(false)
-                            pushDataLayer({
-                              event: "service_request_service_selected",
-                              service_request_service_type: service.value,
-                              service_request_service_label: service.label,
-                              service_request_language: language,
-                            })
                           }}
                           className={`w-full text-left px-3 py-2 text-sm hover:bg-primary/10 transition-colors ${
                             selectedService === service.value ? "bg-primary/10 text-primary" : ""
@@ -279,12 +231,6 @@ ${details}
                   type="text"
                   name="address"
                   required
-                  onFocus={() =>
-                    pushDataLayer({
-                      event: "service_request_field_focus",
-                      service_request_field_name: "address",
-                    })
-                  }
                   className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder={t("addressOfService")}
                 />
@@ -295,12 +241,6 @@ ${details}
                 <textarea
                   name="details"
                   rows={2}
-                  onFocus={() =>
-                    pushDataLayer({
-                      event: "service_request_field_focus",
-                      service_request_field_name: "details",
-                    })
-                  }
                   className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                   placeholder={t("describeDetails")}
                 />
