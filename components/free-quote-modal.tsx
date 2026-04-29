@@ -8,6 +8,18 @@ import { useLanguage } from "@/contexts/language-context"
 import { SimpleToast } from "@/components/simple-toast"
 import { buildMailtoUrl } from "@/lib/email"
 
+declare global {
+  interface Window {
+    dataLayer: Record<string, unknown>[]
+  }
+}
+
+const pushDataLayer = (data: Record<string, unknown>) => {
+  if (typeof window === "undefined") return
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push(data)
+}
+
 interface FreeQuoteModalProps {
   isOpen: boolean
   onClose: () => void
@@ -85,7 +97,23 @@ ${details}
       body: body,
     })
 
-    window.open(mailtoUrl, "_blank")
+    pushDataLayer({
+      event: "request_free_quote",
+      form_name: "Free Quote",
+      form_id: "Free Quote",
+      first_name: firstName,
+      service_type: serviceType,
+      service: selectedService,
+      address: address,
+      contact: contact,
+      details: details,
+    })
+
+    // Let GTM flush before the mailto handoff.
+    setTimeout(() => {
+      window.open(mailtoUrl, "_blank")
+    }, 0)
+
     setShowToast(true)
     setTimeout(() => {
       handleClose()
