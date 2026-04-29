@@ -114,13 +114,20 @@ ${details}
       body: body,
     })
 
-    // The event GTM is listening for.
+    // The event GTM is listening for — same shape as free_quote_form.
     pushDataLayer({
-      event: "service_request",
-      service_request_service_type: selectedService,
-      service_request_service_label: selectedServiceLabel,
-      service_request_language: language,
-      service_request_has_details: details.trim().length > 0,
+      event: "form_submission",
+      form_name: "service_quote_modal",
+      form_id: "service_quote_modal",
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      contact: phone,
+      address: address,
+      service: selectedService,
+      service_label: selectedServiceLabel,
+      details: details,
+      language: language,
     })
 
     // Let GTM flush before the mailto handoff.
