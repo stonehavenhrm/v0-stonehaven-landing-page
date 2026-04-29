@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { X } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import { SimpleToast } from "@/components/simple-toast"
@@ -31,6 +31,7 @@ export function FreeQuoteModal({ isOpen, onClose }: FreeQuoteModalProps) {
   const [serviceType, setServiceType] = useState<"residential" | "commercial" | null>(null)
   const [selectedService, setSelectedService] = useState<string>("")
   const [showToast, setShowToast] = useState(false)
+  const formContainerRef = useRef<HTMLDivElement>(null)
 
   const residentialServices = [t("snowRemoval"), t("lawncare"), t("garbageRemovalService"), t("pressureWashing")]
 
@@ -62,14 +63,27 @@ export function FreeQuoteModal({ isOpen, onClose }: FreeQuoteModalProps) {
     onClose()
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = () => {
+    const container = formContainerRef.current
+    if (!container) return
 
-    const formData = new FormData(e.currentTarget)
-    const firstName = formData.get("firstName") as string
-    const address = formData.get("address") as string
-    const contact = formData.get("contact") as string
-    const details = formData.get("details") as string
+    const firstNameInput = container.querySelector<HTMLInputElement>('[name="firstName"]')
+    const addressInput = container.querySelector<HTMLInputElement>('[name="address"]')
+    const contactInput = container.querySelector<HTMLInputElement>('[name="contact"]')
+    const detailsInput = container.querySelector<HTMLTextAreaElement>('[name="details"]')
+
+    // Native HTML5 validation, since we no longer have a <form> wrapper.
+    for (const el of [firstNameInput, addressInput, contactInput, detailsInput]) {
+      if (!el || !el.checkValidity()) {
+        el?.reportValidity()
+        return
+      }
+    }
+
+    const firstName = firstNameInput!.value
+    const address = addressInput!.value
+    const contact = contactInput!.value
+    const details = detailsInput!.value
 
     const subjectMap: Record<string, string> = {
       en: `Quote Request - ${selectedService}`,
@@ -195,8 +209,8 @@ ${details}
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-center mb-1 sm:mb-2">{t("requestQuote")}</h2>
                 <p className="text-center text-muted-foreground text-sm sm:text-base mb-3 sm:mb-4">{selectedService}</p>
-                <form id="free_quote_form" name="free_quote_form" className="space-y-2 sm:space-y-3" onSubmit={handleSubmit}>
-                  
+                {/* Intentionally NOT a <form> — prevents GTM's built-in form_submission listener from firing. */}
+                <div ref={formContainerRef} className="space-y-2 sm:space-y-3">
                   <div>
                     <label className="block text-xs sm:text-sm font-medium mb-1">{t("firstName")}</label>
                     <input
@@ -246,13 +260,14 @@ ${details}
                       {t("back")}
                     </button>
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleSubmit}
                       className="flex-1 px-4 sm:px-6 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
                     >
                       {t("submit")}
                     </button>
                   </div>
-                </form>
+                </div>
               </div>
             )}
           </div>
