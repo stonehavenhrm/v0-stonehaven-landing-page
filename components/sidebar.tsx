@@ -12,6 +12,18 @@ import { useState } from "react"
 import { SimpleToast } from "@/components/simple-toast"
 import { buildMailtoUrl } from "@/lib/email"
 
+declare global {
+  interface Window {
+    dataLayer: Record<string, unknown>[]
+  }
+}
+
+const pushDataLayer = (data: Record<string, unknown>) => {
+  if (typeof window === "undefined") return
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push(data)
+}
+
 interface SidebarProps {
   onOpenQuoteModal: () => void
   onOpenJoinModal: () => void
@@ -56,7 +68,21 @@ ${message}
       body: body,
     })
 
-    window.open(mailtoUrl, "_blank")
+    pushDataLayer({
+      event: "contact_sidebar",
+      form_name: "contact_us",
+      form_id: "contact_us",
+      name: name,
+      email: email,
+      phone: phone,
+      message: message,
+    })
+
+    // Let GTM flush before the mailto handoff.
+    setTimeout(() => {
+      window.open(mailtoUrl, "_blank")
+    }, 0)
+
     setShowToast(true)
     form.reset()
   }
