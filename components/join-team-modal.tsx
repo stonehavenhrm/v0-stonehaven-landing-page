@@ -8,6 +8,18 @@ import { useLanguage } from "@/contexts/language-context"
 import { SimpleToast } from "@/components/simple-toast"
 import { buildMailtoUrl } from "@/lib/email"
 
+declare global {
+  interface Window {
+    dataLayer: Record<string, unknown>[]
+  }
+}
+
+const pushDataLayer = (data: Record<string, unknown>) => {
+  if (typeof window === "undefined") return
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push(data)
+}
+
 interface JoinTeamModalProps {
   isOpen: boolean
   onClose: () => void
@@ -99,7 +111,26 @@ ${availability}
       body: body,
     })
 
-    window.open(mailtoUrl, "_blank")
+    pushDataLayer({
+      event: "join_team",
+      form_name: "Application Form",
+      form_id: "Application Form",
+      name: name,
+      email: email,
+      age: age,
+      employment_type: employmentType,
+      has_sin: hasSIN,
+      language_spoken: selectedLang?.label || "",
+      language_code: selectedLanguage,
+      experience: experience,
+      availability: availability,
+    })
+
+    // Let GTM flush before the mailto handoff.
+    setTimeout(() => {
+      window.open(mailtoUrl, "_blank")
+    }, 0)
+
     setShowToast(true)
     setTimeout(() => {
       handleClose()
